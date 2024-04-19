@@ -49,7 +49,7 @@ void setNumber(){}
 void display(numberList L){
     Position p;
     for (p = 0; p< L->count; p++)
-        printf("City: %s\nUnit: %s\nAddress: %s\nNumber: %lld",L->list[p].city, L->);
+        printf("City: %s\nUnit: %s\nAddress: %s\nNumber: %lld",L->list[p].city, L->list[p].owner, L->list[p].address, L->list[p].number);
 }
 
 //chèn vào đầu hoặc cuối danh sách
