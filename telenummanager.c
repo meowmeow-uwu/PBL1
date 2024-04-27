@@ -341,7 +341,7 @@ int main()
     p = insert(&Contacts, s2, p);
     p = insert(&Contacts, s3, p); // Thêm số mới
     // display(Contacts);
-    char *c = "0328981817";
+    char *c = "0328981818";
 
     List findby;
     // có thể dùng int choose thay cho enum trong switchcase
@@ -349,13 +349,13 @@ int main()
     if (findby->next != NULL)
         display(findby);
     else
-        printf("NOT FOUND");
+        printf("NOT FOUND\n");
 
     // findby = create();
-    listCity(Contacts);
-    // delete (Contacts, city);
+    // listCity(Contacts);
+    delete (Contacts, c);
     // printf("%s", Contacts->value.number);
-    // display(Contacts);
+    display(Contacts);
 
     free(Contacts);
     return 0;
