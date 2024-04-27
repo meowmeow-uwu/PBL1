@@ -33,6 +33,15 @@ struct Node
 typedef struct Node *List;
 typedef struct Node *Position;
 
+enum findField
+{
+    city,
+    number,
+    address,
+    owner,
+    nhamang
+};
+
 // create a list of number
 List create()
 {
@@ -67,6 +76,9 @@ void display(List L)
     }
     printf("\n");
 }
+void displayPosition(Position p) {
+    printf("-Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", p->value.number, p->value.city, p->value.owner, p->value.address);
+}
 
 // chèn vào đầu hoặc cuối danh sách
 void add() {}
@@ -95,12 +107,40 @@ Position insert(List *pL, struct NumberInfo e, Position p)
 }
 
 // tìm kiếm theo các tiêu chí
-Position find(List pL, char *city)
+Position find(List pL, enum findField field, char *data)
 {
-    while (pL != NULL && strcmp(pL->value.city, city) != 0)
+    while (pL != NULL)
+    {
+        switch (field)
+        {
+            case city:
+                if (strcmp(pL->value.city, data) == 0)
+                    return pL;
+                break;
+            case number:
+                if (strcmp(pL->value.number, data) == 0)
+                    return pL;
+                break;
+            case address:
+                if (strcmp(pL->value.address, data) == 0)
+                    return pL;
+                break;
+            case owner:
+                if (strcmp(pL->value.owner, data) == 0)
+                    return pL;
+                break;
+            case nhamang:
+                if (strcmp(pL->value.nhamang, data) == 0)
+                    return pL;
+                break;
+            default:
+                return NULL; // Trường không hợp lệ
+        }
         pL = pL->next;
-    return pL;
+    }
+    return NULL; // Không tìm thấy
 }
+
 
 Position find1() {}
 
@@ -116,10 +156,10 @@ void Arrange2() {}
 void Arrange3() {}
 
 // xóa mẫu tin
-void delete(List L, char* city)
+void delete(List L, char *data)
 {
     Position p;
-    p=find(L, city);
+    p = find(L, city, data);
     if (p == NULL)
         return;
     p->prev->next = p->next;
@@ -149,7 +189,9 @@ int main()
     p = insert(&Contacts, s1, p);
     p = insert(&Contacts, s2, p);
     display(Contacts);
-    char *city = "Da Nang";
+    char *c = "Da Nang";
+    p = find(Contacts, city, c);
+    displayPosition(p);
     // delete (Contacts, city);
     // printf("%s", Contacts->value.number);
     // display(Contacts);
