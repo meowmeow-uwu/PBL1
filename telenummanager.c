@@ -9,8 +9,7 @@ Tên đơn vị: Công ty ABC
 Địa chỉ: Số 123 Đường ABC, Quận XYZ, Hà Nội
 Số điện thoại: 123456789
 */
-
-const int MAX_SIZE = 1000;
+#define MAX_SIZE  1000
 typedef unsigned long long Number;
 typedef int Position;
 
