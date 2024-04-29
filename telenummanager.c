@@ -323,7 +323,42 @@ void list()
 }
 
 // thống kê số lượng thuê bao theo tỉnh thành
-void count() {}
+    void countPhonesByCity(List L) {
+    const char *provinces[] = {
+        "Ha Noi", "Ha Giang", "Cao Bang", "Bac Kan", "Tuyen Quang", "Lao Cai",
+        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hòa Bình", "Thai Nguyen",
+        "Lang Son", "Bac Giang", "Phu Tho", "Vinh Phuc", "Quang Ninh", "Bac Ninh",
+        "Hai Duong", "Hung Yen", "Ha Nam", "Nam Dinh", "Thai Binh", "Ninh Binh",
+        "Thanh Hoa", "Nghe An", "Ha Tinh", "Quang Binh", "Quang Tri", "Thua Thien Hue",
+        "Da Nang", "Quang Nam", "Quang Ngai", "Binh Dinh", "Phu Yen", "Khanh Hoa",
+        "Ninh Thuan", "Binh Thuan", "Kon Tum", "Gia Lai", "Dak Lak", "Dak Nong",
+        "Lam Dong", "Binh Phuoc", "Tay Ninh", "Binh Duong", "Dong Nai", "Ba Ria - Vung Tau",
+        "Long An", "Tien Giang", "Ben Tre", "Dong Thap", "An Giang", "Kien Giang",
+        "Can Tho", "Hau Giang", "Soc Trang", "Tra Vinh", "Bac Lieu", "Ca Mau"
+    };
+
+    int counts[62] = {0}; // Mảng đếm số điện thoại cho mỗi tỉnh thành
+
+    Position current = L->next;
+    while (current != NULL) {
+        char *city = current->value.city;
+        for (int i = 0; i < 62; ++i) {
+            if (strcmp(provinces[i], city) == 0) {
+                counts[i]++;
+                break;
+            }
+        }
+        current = current->next;
+    }
+
+    printf("Thong ke so dien thoai theo tinh thanh:\n");
+    for (int i = 0; i < 62; ++i) {
+        if (counts[i] > 0) {
+            printf("%s: %d so dien thoai\n", provinces[i], counts[i]);
+        }
+    }
+}
+
 
 // tìm và thông báo nếu có trùng lặp, xóa
 void duplicate() {}
