@@ -386,7 +386,8 @@ void list()
 }
 
 // thống kê số lượng thuê bao theo tỉnh thành
-    void countPhonesByCity(List L) {
+void countPhonesByCity(List L)
+{
     const char *provinces[] = {
         "Ha Noi", "Ha Giang", "Cao Bang", "Bac Kan", "Tuyen Quang", "Lao Cai",
         "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hòa Bình", "Thai Nguyen",
@@ -397,16 +398,18 @@ void list()
         "Ninh Thuan", "Binh Thuan", "Kon Tum", "Gia Lai", "Dak Lak", "Dak Nong",
         "Lam Dong", "Binh Phuoc", "Tay Ninh", "Binh Duong", "Dong Nai", "Ba Ria - Vung Tau",
         "Long An", "Tien Giang", "Ben Tre", "Dong Thap", "An Giang", "Kien Giang",
-        "Can Tho", "Hau Giang", "Soc Trang", "Tra Vinh", "Bac Lieu", "Ca Mau"
-    };
+        "Can Tho", "Hau Giang", "Soc Trang", "Tra Vinh", "Bac Lieu", "Ca Mau"};
 
     int counts[62] = {0}; // Mảng đếm số điện thoại cho mỗi tỉnh thành
-
+    int i;
     Position current = L->next;
-    while (current != NULL) {
+    while (current != NULL)
+    {
         char *city = current->value.city;
-        for (int i = 0; i < 62; ++i) {
-            if (strcmp(provinces[i], city) == 0) {
+        for (i = 0; i < 62; ++i)
+        {
+            if (strcmp(provinces[i], city) == 0)
+            {
                 counts[i]++;
                 break;
             }
@@ -415,13 +418,14 @@ void list()
     }
 
     printf("Thong ke so dien thoai theo tinh thanh:\n");
-    for (int i = 0; i < 62; ++i) {
-        if (counts[i] > 0) {
+    for (i = 0; i < 62; ++i)
+    {
+        if (counts[i] > 0)
+        {
             printf("%s: %d so dien thoai\n", provinces[i], counts[i]);
         }
     }
 }
-
 
 // Tìm và thông báo nếu có trùng lặp, xóa
 void duplicate(List L)
@@ -461,10 +465,10 @@ int main()
     struct NumberInfo s3 = setNumber("0328981818", "Ha Noi", "Dat", "DHBK");
 
     List Contacts = create();
-    // Contacts = NULL;
+    Contacts = NULL;
     Position p;
     p = insert(&Contacts, s1, p);
-    printf("%s",p->value.city);
+    printf("%s", p->value.city);
     if (p == NULL)
         printf("None");
     display(Contacts);
