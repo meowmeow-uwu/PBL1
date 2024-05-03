@@ -8,16 +8,20 @@ Tên tỉnh thành: Hà Nội
 Tên đơn vị: Công ty ABC
 Địa chỉ: Số 123 Đường ABC, Quận XYZ, Hà Nội
 Số điện thoại: 123456789
+Nhà mạng : Viettel
+
+123456789, Viettel, Công ty ABC, Số 123 Đường ABC Quận XYZ Hà Nội, Hà Nội
 */
 
 // danh sách mẫu tin
 struct NumberInfo
 {
-    char *city;
-    char *owner;
-    char *address;
-    char *nhamang;
     char *number;
+    char *nhamang;
+    char *owner;
+    char *address;    
+    char *city;
+    
 };
 
 typedef struct NumberInfo *numberInfo;
@@ -370,8 +374,19 @@ void listCity(List L)
     }
 }
 
-// chèn vào đầu hoặc cuối danh sách
-void add() {}
+// chèn vào đầu danh sách
+Position insertfirst(List pL,struct NumberInfo e){
+	Position newItem;
+	newItem = malloc(sizeof(struct Node));
+	newItem->value = e;
+
+	newItem->next = pL->next;
+	newItem->prev = pL;
+	pL->next = newItem;
+	if (newItem->next!=NULL)
+		newItem->next->prev = newItem;
+	return newItem;
+}
 
 // sắp xếp theo các tiêu chí, @override
 void Arrange1() {}
@@ -453,6 +468,43 @@ void duplicate(List L)
         else
         {
             current = current->next; // Di chuyển con trỏ hiện tại đến mục tiếp theo nếu không tìm thấy trùng lặp
+        }
+    }
+}
+void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, NumberInfo *e)
+{
+    char line[256];
+    if (fgets(line, sizeof(line), filein) != NULL)
+    {
+        // Sử dụng strtok để tách các trường thông tin từ dòng đọc được
+        char *token = strtok(line, ",");
+        e->number = strdup(token); // Sao chép và lưu trữ số điện thoại
+
+        token = strtok(NULL, ",");
+        e->nhamang = strdup(token); // Sao chép và lưu trữ nhà mạng
+
+        token = strtok(NULL, ",");
+        e->owner = strdup(token); // Sao chép và lưu trữ tên chủ sở hữu
+
+        token = strtok(NULL, ",");
+        e->address = strdup(token); // Sao chép và lưu trữ địa chỉ
+
+        token = strtok(NULL, "\n");
+        e->city = strdup(token); // Sao chép và lưu trữ thành phố
+    }
+}
+
+
+// Hàm đọc danh sách số điện thoại từ file
+void Doc_Danh_Sach_So_Dien_Thoai(FILE *filein, List pL)
+{
+    NumberInfo e;
+    while (!feof(filein))
+    {
+        Doc_File_Thong_Tin_So_Dien_Thoai(filein, &e);
+        if (e.number != NULL)
+        {
+            InsertFirst(pL, e);
         }
     }
 }
