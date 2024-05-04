@@ -19,9 +19,8 @@ struct NumberInfo
     char *number;
     char *nhamang;
     char *owner;
-    char *address;    
+    char *address;
     char *city;
-    
 };
 
 typedef struct NumberInfo *numberInfo;
@@ -55,23 +54,48 @@ List create()
     return L;
 }
 
-// create one new number element
-struct NumberInfo setNumber(char *number, char *city, char *owner, char *address)
-{
-    struct NumberInfo one;
+// nhap vao mot so dien thoai moi va them vao contacts L
+void setNumber(List L) {
+    unsigned long m;
+    char str[100];
+    NumberInfo one;
 
-    one.number = strdup(number);
-    one.city = strdup(city);
-    one.owner = strdup(owner);
-    one.address = strdup(address);
+    printf("So dien thoai: ");
 
-    return one;
+    int chck = scanf("%lu", &m);
+    getchar();
+    for(;;)
+    {   if (chck != 1) {printf("\nKhong hop le, vui long nhap lai!!!\n");continue;}
+        else {one.number = m;break;}
+    }
+    printf("Nha mang: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.nhamang = strdup(str);
+
+    printf("Chu so huu: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.owner = strdup(str);
+
+    printf("Dia chi: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.address = strdup(str);
+
+    printf("Thanh pho: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.city = strdup(str);
+
+    InsertFirst(L, one);
 }
 
 // in danh sách thông tin tất cả danh bạ
 void display(List L)
 {
     printf("\n");
+    printf("\nDanh sach so dien thoai:\n");
     int count = 1;
     while (L != NULL)
     {
@@ -375,21 +399,22 @@ void listCity(List L)
 }
 
 // chèn vào đầu danh sách
-Position insertfirst(List pL,struct NumberInfo e){
-	Position newItem;
-	newItem = malloc(sizeof(struct Node));
-	newItem->value = e;
+Position insertfirst(List pL, struct NumberInfo e)
+{
+    Position newItem;
+    newItem = malloc(sizeof(struct Node));
+    newItem->value = e;
 
-	newItem->next = pL->next;
-	newItem->prev = pL;
-	pL->next = newItem;
-	if (newItem->next!=NULL)
-		newItem->next->prev = newItem;
-	return newItem;
+    newItem->next = pL->next;
+    newItem->prev = pL;
+    pL->next = newItem;
+    if (newItem->next != NULL)
+        newItem->next->prev = newItem;
+    return newItem;
 }
 
 // sắp xếp theo các tiêu chí, @override
-void Arrange1() {}
+void Arrange1() {} // theo alphabe up,down
 
 void Arrange2() {}
 
@@ -405,7 +430,7 @@ void countPhonesByCity(List L)
 {
     const char *provinces[] = {
         "Ha Noi", "Ha Giang", "Cao Bang", "Bac Kan", "Tuyen Quang", "Lao Cai",
-        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hòa Bình", "Thai Nguyen",
+        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hoa Binh", "Thai Nguyen",
         "Lang Son", "Bac Giang", "Phu Tho", "Vinh Phuc", "Quang Ninh", "Bac Ninh",
         "Hai Duong", "Hung Yen", "Ha Nam", "Nam Dinh", "Thai Binh", "Ninh Binh",
         "Thanh Hoa", "Nghe An", "Ha Tinh", "Quang Binh", "Quang Tri", "Thua Thien Hue",
@@ -493,7 +518,6 @@ void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, NumberInfo *e)
         e->city = strdup(token); // Sao chép và lưu trữ thành phố
     }
 }
-
 
 // Hàm đọc danh sách số điện thoại từ file
 void Doc_Danh_Sach_So_Dien_Thoai(FILE *filein, List pL)
