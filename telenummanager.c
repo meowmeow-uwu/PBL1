@@ -132,7 +132,18 @@ Position insert(List *pL, struct NumberInfo e, Position p)
     }
     return newItem;
 }
-
+// hàm xuất danh bạ ra file
+void Xuat_Danh_Sach_So_Dien_Thoai(FILE *fileout, List L)
+{
+    fprintf(fileout, "Danh sach so dien thoai:\n");
+    while (L!= NULL)
+    {
+        fprintf(fileout, "%d, %s, %s, %s, %s\n",
+                L->next->value.number, L->next->value.nhamang,
+                L->next->value.owner, L->next->value.address, L->next->value.city);
+        L = L->next;
+    }
+}
 // tìm kiếm theo các tiêu chí
 List findAll(List L, enum findField field, char *data)
 {
