@@ -82,6 +82,18 @@ void displayPosition(Position p)
     printf("-Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", p->value.number, p->value.city, p->value.owner, p->value.address);
 }
 
+void displayCity(List L)
+{
+    printf("\nCurrent cities: \n");
+    int count = 1;
+    while (L != NULL)
+    {
+        printf("%d. %s\n", count++, L->value.city);
+        L = L->next;
+    }
+    printf("\n");
+}
+
 // chèn vị trí bất kì
 Position insert(List *pL, struct NumberInfo e, Position p)
 {
@@ -105,14 +117,56 @@ Position insert(List *pL, struct NumberInfo e, Position p)
     return newItem;
 }
 
-// tìm kiếm theo các tiêu chí
-List findAll(List L, enum findField field, char *data)
+// chèn bất kỳ
+void insertM() {}
+
+void insertFirst(List *pL, struct NumberInfo num)
 {
-    printf("Result found: ");
+    Position newItem = malloc(sizeof(struct Node));
+
+    // if (newItem == NULL){
+    //     fprintf(stderr, "Memory allocation failed.\n");
+    //     return;}
+
+    newItem->value = num;
+    newItem->next = *pL;
+    newItem->prev = NULL;
+
+    if (*pL != NULL)
+    {
+        (*pL)->prev = newItem;
+    }
+    *pL = newItem;
+}
+
+// chèn vào đầu hoặc cuối danh sách
+void add(List *L, struct NumberInfo num, int choose)
+{
+    Position q = *L;
+    switch (choose)
+    {
+    case 1:
+        insertFirst(L, num);
+        break;
+    case 2: // chen cuoi danh sach
+        while (q->next != NULL)
+            q = q->next;
+        insert(L, num, q);
+        break;
+    default: // NULL:))
+        break;
+    }
+}
+
+// tìm kiếm theo các tiêu chí
+List findAll(List L, enum findField field, char *data, int *count)
+{
+    // printf("Result found: ");
     List resultList = create(); // Tạo danh sách kết quả mới
     Position current = L;
     Position p = NULL; // Bắt đầu từ phần tử đầu tiên
     /*thieu NULL*/
+    *count = 0;
 
     // Duyệt qua danh sách liên kết để tìm tất cả các phần tử phù hợp
     while (current != NULL)
@@ -125,30 +179,35 @@ List findAll(List L, enum findField field, char *data)
             {
                 // Thêm nút phù hợp vào danh sách kết quả
                 p = insert(&resultList, current->value, p);
+                (*count)++;
             }
             break;
         case number:
             if (strcmp(current->value.number, data) == 0)
             {
                 p = insert(&resultList, current->value, p);
+                (*count)++;
             }
             break;
         case address:
             if (strcmp(current->value.address, data) == 0)
             {
                 p = insert(&resultList, current->value, p);
+                (*count)++;
             }
             break;
         case owner:
             if (strcmp(current->value.owner, data) == 0)
             {
                 p = insert(&resultList, current->value, p);
+                (*count)++;
             }
             break;
         case nhamang:
             if (strcmp(current->value.nhamang, data) == 0)
             {
                 p = insert(&resultList, current->value, p);
+                (*count)++;
             }
             break;
         default:
@@ -157,12 +216,13 @@ List findAll(List L, enum findField field, char *data)
         }
         current = current->next; // Chuyển sang nút kế tiếp trong danh sách
     }
+
     return resultList; // Trả về danh sách chứa tất cả các nút phù hợp
 }
 
 Position find(List L, enum findField field, char *data)
 {
-    Position current = L->next; // Bắt đầu từ phần tử đầu tiên của danh sách
+    Position current = L; // Bắt đầu từ phần tử đầu tiên của danh sách
 
     // Duyệt qua danh sách liên kết để tìm phần tử phù hợp
     while (current != NULL)
@@ -211,9 +271,9 @@ Position find(List L, enum findField field, char *data)
 }
 
 // xóa mẫu tin
-void delete(List L, char *data)
+void delete(List L, Position p)
 {
-    Position p = find(L, number, data); // Tìm phần tử cần xóa
+    // Position p = find(L, number, data); // Tìm phần tử cần xóa
     if (p == NULL)
         return;
     // Kiểm tra nếu phần tử cần xóa là phần tử đầu tiên
@@ -230,148 +290,41 @@ void delete(List L, char *data)
     free(p); // Giải phóng bộ nhớ của phần tử bị xóa
 }
 
-List copyList(List L)
-{
-    List copy = create();     // Tạo một danh sách mới để lưu trữ bản sao
-    Position current = L;     // Con trỏ để duyệt qua danh sách gốc
-    Position prevCopy = NULL; // Con trỏ đến phần tử trước của danh sách sao chép
-
-    // Duyệt qua danh sách gốc và sao chép từng phần tử
-    while (current != NULL)
-    {
-        // Tạo một phần tử mới để sao chép dữ liệu từ danh sách gốc
-        Position newItem = malloc(sizeof(struct Node));
-        if (newItem == NULL)
-        {
-            printf("Khong du bo nho!\n");
-            return NULL;
-        }
-        newItem->value = current->value; // Sao chép dữ liệu từ phần tử của danh sách gốc
-        newItem->next = NULL;            // Đặt con trỏ next của phần tử mới thành NULL
-
-        // Nếu danh sách sao chép không có phần tử nào, thiết lập phần tử đầu tiên
-        if (copy == NULL)
-        {
-            copy = newItem;
-        }
-        else
-        {
-            // Nếu danh sách sao chép đã có phần tử, chèn phần tử mới vào cuối danh sách
-            prevCopy->next = newItem;
-        }
-        prevCopy = newItem; // Di chuyển con trỏ prevCopy đến phần tử mới
-
-        current = current->next; // Di chuyển con trỏ trong danh sách gốc
-    }
-
-    return copy; // Trả về danh sách sao chép hoàn chỉnh
-}
-
 // list all city in Contacts
-List listCity1(List L)
-{
-    List City = create();       // Tạo danh sách mới để lưu trữ các thành phố duy nhất
-    Position current = L->next; // Bắt đầu từ phần tử đầu tiên của danh sách
-
-    // Duyệt qua danh sách liên kết để lấy các thành phố
-    while (current != NULL)
-    {
-        // Kiểm tra xem thành phố hiện tại đã tồn tại trong danh sách thành phố chưa
-        if (find(City, city, current->value.city) == NULL)
-        {
-            // Nếu chưa tồn tại, thêm thành phố vào danh sách thành phố
-            insert(&City, current->value, NULL); // Không cần sử dụng p
-        }
-        current = current->next; // Chuyển sang phần tử tiếp theo trong danh sách
-    }
-
-    return City; // Trả về danh sách thành phố duy nhất
-}
-
 List City(List L)
 {
-    List cityList = create(); // Danh sách để lưu trữ các tỉnh thành duy nhất
-    Position p = L->next;
-    insert(&cityList, L->value, NULL); // Bắt đầu từ phần tử đầu tiên của danh bạ
+    List City = create();
+    City = NULL;
+    Position q;
 
-    // Duyệt qua danh sách liên kết để lấy các tỉnh thành duy nhất
+    if (L != NULL)
+        q = insert(&City, L->value, City);
     while (L != NULL)
     {
-        // Kiểm tra xem tỉnh thành hiện tại đã tồn tại trong danh sách tỉnh thành chưa
-        while (p->value.city == L->value.city && p != NULL)
-        {
-            // Nếu chưa tồn tại, thêm tỉnh thành vào danh sách tỉnh thành
-            delete (cityList, L->value.city);
-            p = p->next;
-        }
-        L = L->next; // Chuyển sang phần tử tiếp theo trong danh sách danh bạ
+        if (find(City, city, L->value.city) == NULL)
+            q = insert(&City, L->value, q);
+        L = L->next;
     }
 
-    return cityList; // Trả về danh sách các tỉnh thành duy nhất
+    return City;
 }
 
-List ListCity(List L)
+// liệt kê danh bạ từng tỉnh thành + thống kê số lượng thuê bao
+void listCity(List L, int choose)
 {
-    List uniqueCityList = copyList(L); // Tạo bản sao của danh sách gốc
-    Position current = uniqueCityList; // Con trỏ để duyệt qua danh sách thành phố duy nhất
-
-    // Duyệt qua danh sách thành phố duy nhất
-    while (current != NULL)
+    List listCity = City(L);
+    List findCity;
+    int count;
+    while (listCity != NULL)
     {
-        Position nextCity = current->next; // Con trỏ đến thành phố tiếp theo
-        Position prevCity = current;       // Con trỏ đến thành phố trước đó
-
-        // Duyệt qua danh sách thành phố còn lại để kiểm tra trùng lặp
-        while (nextCity != NULL)
-        {
-            // Nếu tìm thấy thành phố trùng lặp, loại bỏ nó khỏi danh sách
-            if (strcmp(nextCity->value.city, current->value.city) == 0)
-            {
-                Position temp = nextCity;  // Lưu trữ con trỏ đến thành phố trùng lặp
-                nextCity = nextCity->next; // Di chuyển con trỏ đến thành phố tiếp theo
-                prevCity->next = nextCity; // Loại bỏ thành phố trùng lặp
-                free(temp);                // Giải phóng bộ nhớ của thành phố trùng lặp
-            }
-            else
-            {
-                prevCity = nextCity;       // Di chuyển con trỏ đến thành phố trước đó
-                nextCity = nextCity->next; // Di chuyển con trỏ đến thành phố tiếp theo
-            }
-        }
-
-        current = current->next; // Di chuyển con trỏ đến thành phố tiếp theo trong danh sách duy nhất
-    }
-
-    return uniqueCityList; // Trả về danh sách thành phố duy nhất
-}
-
-void listCity(List L)
-{
-    List cityList = City(L); // Tạo danh sách các tỉnh thành duy nhất
-    display(cityList);
-    // Duyệt qua danh sách các tỉnh thành duy nhất
-    Position currentCity = cityList; // Bắt đầu từ phần tử đầu tiên của danh sách tỉnh thành
-    while (currentCity != NULL)
-    {
-        printf("Danh ba cua %s:\n", currentCity->value.city);
-
-        // Duyệt qua danh sách danh bạ để tìm các mẫu tin thuộc tỉnh thành hiện tại
-        Position currentContact = L->next; // Bắt đầu từ phần tử đầu tiên của danh bạ
-        while (currentContact != NULL)
-        {
-            if (strcmp(currentContact->value.city, currentCity->value.city) == 0)
-            {
-                displayPosition(currentContact); // In ra thông tin danh bạ của mỗi mẫu tin thuộc tỉnh thành hiện tại
-            }
-            currentContact = currentContact->next; // Chuyển sang phần tử tiếp theo trong danh sách danh bạ
-        }
-
-        currentCity = currentCity->next; // Chuyển sang phần tử tiếp theo trong danh sách các tỉnh thành
+        findCity = findAll(L, city, listCity->value.city, &count);
+        printf("%s: ", listCity->value.city);
+        printf("%d\n", count);
+        if (choose == 4)
+            display(findCity);
+        listCity = listCity->next;
     }
 }
-
-// chèn vào đầu hoặc cuối danh sách
-void add() {}
 
 // sắp xếp theo các tiêu chí, @override
 void Arrange1() {}
@@ -379,11 +332,6 @@ void Arrange1() {}
 void Arrange2() {}
 
 void Arrange3() {}
-
-// liệt kê danh bạ từng tỉnh thành
-void list()
-{
-}
 
 // thống kê số lượng thuê bao theo tỉnh thành
 void countPhonesByCity(List L)
@@ -428,32 +376,31 @@ void countPhonesByCity(List L)
 }
 
 // Tìm và thông báo nếu có trùng lặp, xóa
-void duplicate(List L)
+int duplicate(List *L)
 {
-    Position current = L->next; // Bắt đầu từ phần tử đầu tiên của danh sách
-
-    // Duyệt qua danh sách liên kết để tìm các mục trùng lặp
-    while (current != NULL)
+    List temp = *L;
+    Position p = *L;
+    while (p != NULL)
     {
-        char *currentNumber = current->value.number;
-        Position search = find(current->next, number, currentNumber); // Tìm mục trùng lặp
-
-        // Nếu tìm thấy mục trùng lặp
-        if (search != NULL)
+        while (temp != NULL)
         {
-            printf("Duplicate found:\n");
-            displayPosition(current); // In thông tin mục trùng lặp
-            displayPosition(search);  // In thông tin mục trùng lặp
-
-            Position temp = current;   // Lưu trữ con trỏ đến mục hiện tại
-            current = current->next;   // Di chuyển con trỏ hiện tại đến mục tiếp theo trước khi xóa mục hiện tại
-            delete (L, currentNumber); // Xóa mục trùng lặp từ danh sách
-            free(temp);                // Giải phóng bộ nhớ của mục trùng lặp
+            if (p->value.number == temp->value.number && p->value.city == temp->value.city)
+            {
+                printf("Co su trung lap:\n");
+                displayPosition(p);
+                displayPosition(temp);
+                printf("Ban muon xoa khong?\n1. Yes\n2. No");
+                int choose;
+                scanf("%d", &choose);
+                if (choose == 1)
+                {
+                    delete (*L, p);
+                    delete (temp, p);
+                }
+            }
+            temp = temp->next;
         }
-        else
-        {
-            current = current->next; // Di chuyển con trỏ hiện tại đến mục tiếp theo nếu không tìm thấy trùng lặp
-        }
+        p = p->next;
     }
 }
 
@@ -468,33 +415,44 @@ int main()
     Contacts = NULL;
     Position p;
     p = insert(&Contacts, s1, p);
-    printf("%s", p->value.city);
-    if (p == NULL)
-        printf("None");
-    display(Contacts);
     p = insert(&Contacts, s2, p);
     p = insert(&Contacts, s3, p); // Thêm số mới
-    // display(Contacts);
-    char *c = "0328981818";
+    char *c = "0328981817";
+    int count;
 
     List findby;
     // có thể dùng int choose thay cho enum trong switchcase
-    findby = findAll(Contacts, number, c);
-    if (findby != NULL)
-        display(findby);
+    findby = findAll(Contacts, number, c, &count);
+    if (findby != NULL){
+        printf("FOUND: ");
+        display(findby);}
     else
         printf("NOT FOUND\n");
 
-    // findby = create();
-    // listCity(Contacts);
-    delete (Contacts, c);
-    // printf("%s", Contacts->value.number);
-    display(Contacts);
-    printf("L: \n");
-    // List cityL = ListCity(Contacts);
-    duplicate(Contacts);
+    // delete (Contacts, c);
+    // display(Contacts);
+
+    List listcity;
+    listcity = City(Contacts);
+    displayCity(listcity);
+
+    // thay 1 thành 4 nếu muốn chuyển sang liệt kê danh bạ theo tỉnh thành
+    printf("ham listCity: \n");
+    listCity(Contacts, 1);
+
+    printf("\nham listCity: \n");
+    listCity(Contacts, 4);
+
+    printf("\nham add: \n");
+    add(&Contacts, s3, 1);
     display(Contacts);
 
+    // unfixed
+    printf("L: \n");
+    // duplicate(Contacts);
+    // display(Contacts);
+
     free(Contacts);
+    free(p);
     return 0;
 }
