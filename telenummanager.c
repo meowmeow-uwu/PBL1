@@ -8,16 +8,19 @@ Tên tỉnh thành: Hà Nội
 Tên đơn vị: Công ty ABC
 Địa chỉ: Số 123 Đường ABC, Quận XYZ, Hà Nội
 Số điện thoại: 123456789
+Nhà mạng : Viettel
+
+123456789, Viettel, Công ty ABC, Số 123 Đường ABC Quận XYZ Hà Nội, Hà Nội
 */
 
 // danh sách mẫu tin
 struct NumberInfo
 {
-    char *city;
+    char *number;
+    char *nhamang;
     char *owner;
     char *address;
-    char *nhamang;
-    char *number;
+    char *city;
 };
 
 typedef struct NumberInfo *numberInfo;
@@ -62,6 +65,73 @@ struct NumberInfo setNumber(char *number, char *city, char *owner, char *address
     one.address = strdup(address);
 
     return one;
+}
+
+void insertFirst(List *pL, struct NumberInfo num)
+{
+    Position newItem = malloc(sizeof(struct Node));
+
+    // if (newItem == NULL){
+    //     fprintf(stderr, "Memory allocation failed.\n");
+    //     return;}
+
+    newItem->value = num;
+    newItem->next = *pL;
+    newItem->prev = NULL;
+
+    if (*pL != NULL)
+    {
+        (*pL)->prev = newItem;
+    }
+    *pL = newItem;
+}
+
+// nhap vao mot so dien thoai moi va them vao contacts L
+void setNumber1(List L)
+{
+    unsigned long m;
+    char str[100];
+    struct NumberInfo one;
+
+    printf("So dien thoai: ");
+
+    int chck = scanf("%lu", &m);
+    getchar();
+    for (;;)
+    {
+        if (chck != 1)
+        {
+            printf("\nKhong hop le, vui long nhap lai!!!\n");
+            continue;
+        }
+        else
+        {
+            one.number = m;
+            break;
+        }
+    }
+    printf("Nha mang: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.nhamang = strdup(str);
+
+    printf("Chu so huu: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.owner = strdup(str);
+
+    printf("Dia chi: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.address = strdup(str);
+
+    printf("Thanh pho: ");
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.city = strdup(str);
+//**************************************************************
+    //********** nên linh hoạt bằng con trỏ hàm hoặc switch case:))
+    insertFirst(L, one);
 }
 
 // in danh sách thông tin tất cả danh bạ
@@ -120,24 +190,6 @@ Position insert(List *pL, struct NumberInfo e, Position p)
 // chèn bất kỳ
 void insertM() {}
 
-void insertFirst(List *pL, struct NumberInfo num)
-{
-    Position newItem = malloc(sizeof(struct Node));
-
-    // if (newItem == NULL){
-    //     fprintf(stderr, "Memory allocation failed.\n");
-    //     return;}
-
-    newItem->value = num;
-    newItem->next = *pL;
-    newItem->prev = NULL;
-
-    if (*pL != NULL)
-    {
-        (*pL)->prev = newItem;
-    }
-    *pL = newItem;
-}
 
 // chèn vào đầu hoặc cuối danh sách
 void add(List *L, struct NumberInfo num, int choose)
@@ -327,7 +379,7 @@ void listCity(List L, int choose)
 }
 
 // sắp xếp theo các tiêu chí, @override
-void Arrange1() {}
+void Arrange1() {} // theo alphabe up,down
 
 void Arrange2() {}
 
@@ -338,7 +390,7 @@ void countPhonesByCity(List L)
 {
     const char *provinces[] = {
         "Ha Noi", "Ha Giang", "Cao Bang", "Bac Kan", "Tuyen Quang", "Lao Cai",
-        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hòa Bình", "Thai Nguyen",
+        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hoa Binh", "Thai Nguyen",
         "Lang Son", "Bac Giang", "Phu Tho", "Vinh Phuc", "Quang Ninh", "Bac Ninh",
         "Hai Duong", "Hung Yen", "Ha Nam", "Nam Dinh", "Thai Binh", "Ninh Binh",
         "Thanh Hoa", "Nghe An", "Ha Tinh", "Quang Binh", "Quang Tri", "Thua Thien Hue",
@@ -404,6 +456,43 @@ int duplicate(List *L)
     }
 }
 
+void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
+{
+    char line[256];
+    if (fgets(line, sizeof(line), filein) != NULL)
+    {
+        // Sử dụng strtok để tách các trường thông tin từ dòng đọc được
+        char *token = strtok(line, ",");
+        e->number = strdup(token); // Sao chép và lưu trữ số điện thoại
+
+        token = strtok(NULL, ",");
+        e->nhamang = strdup(token); // Sao chép và lưu trữ nhà mạng
+
+        token = strtok(NULL, ",");
+        e->owner = strdup(token); // Sao chép và lưu trữ tên chủ sở hữu
+
+        token = strtok(NULL, ",");
+        e->address = strdup(token); // Sao chép và lưu trữ địa chỉ
+
+        token = strtok(NULL, "\n");
+        e->city = strdup(token); // Sao chép và lưu trữ thành phố
+    }
+}
+
+// Hàm đọc danh sách số điện thoại từ file
+void Doc_Danh_Sach_So_Dien_Thoai(FILE *filein, List pL)
+{
+    struct NumberInfo e;
+    while (!feof(filein))
+    {
+        Doc_File_Thong_Tin_So_Dien_Thoai(filein, &e);
+        if (e.number != NULL)
+        {
+            insertFirst(pL, e);
+        }
+    }
+}
+
 /*                  */
 int main()
 {
@@ -423,9 +512,11 @@ int main()
     List findby;
     // có thể dùng int choose thay cho enum trong switchcase
     findby = findAll(Contacts, number, c, &count);
-    if (findby != NULL){
+    if (findby != NULL)
+    {
         printf("FOUND: ");
-        display(findby);}
+        display(findby);
+    }
     else
         printf("NOT FOUND\n");
 
