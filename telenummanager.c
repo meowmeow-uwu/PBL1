@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 
 /*
 Tên tỉnh thành: Hà Nội
@@ -378,8 +379,42 @@ void listCity(List L, int choose)
     }
 }
 
+void swapNodes(List *pL, Position first, Position second) {
+    char* tempcity = first->value.city; // Giả sử là chỉ đổi tên
+    first->value.city = second->value.city;
+    second->value.city = tempcity;
+}
+
 // sắp xếp theo các tiêu chí, @override
 void Arrange1() {} // theo alphabe up,down
+
+void Arrange(List *pL, bool ascending) {
+    bool swapped;
+    Position current, next, lastPtr = NULL;
+
+    /* Kiểm tra danh sách có rỗng không hoặc chỉ có một phần tử */
+    if (*pL == NULL || (*pL)->next == NULL) {
+        return;
+    }
+
+    do {
+        swapped = false;
+        current = *pL;
+
+        while (current->next != lastPtr) {
+            next = current->next;
+            // So sánh và quyết định điều kiện dựa trên biến 'ascending'
+            if ((ascending && strcmp(current->value.city, next->value.city) > 0) ||
+                (!ascending && strcmp(current->value.city, next->value.city) < 0)) {
+                // Đoạn này giả sử rằng ta có hàm swapNodes để hoán đổi hai phần tử
+                swapNodes(pL, current, next);
+                swapped = true;
+            }
+            current = next;
+        }
+        lastPtr = current; // cập nhật phần tử cuối cùng đã được sắp xếp
+    } while (swapped);
+}
 
 void Arrange2() {}
 
@@ -427,33 +462,52 @@ void countPhonesByCity(List L)
     }
 }
 
+void delete1(List *L, Position p)
+{
+    if (p->prev != NULL) p->prev->next = p->next;
+    if (p->next != NULL) p->next->prev = p->prev;
+    if (p == *L) *L = p->next; // Nếu xóa phần tử đầu danh sách
+    free(p);
+}
+
 // Tìm và thông báo nếu có trùng lặp, xóa
 int duplicate(List *L)
 {
-    List temp = *L;
-    Position p = *L;
-    while (p != NULL)
-    {
-        while (temp != NULL)
-        {
-            if (p->value.number == temp->value.number && p->value.city == temp->value.city)
-            {
-                printf("Co su trung lap:\n");
+    Position p = *L, temp;
+    int foundDuplicates = 0;
+
+    while (p->next != NULL) { // Không cần kiểm tra nếu p là phần tử cuối cùng
+        temp = p->next;
+        while (temp != NULL) {
+            if ((p->value.number == temp->value.number)==0 && strcmp(p->value.city, temp->value.city) == 0) {
+                printf("Co su trung lap giua hai phan tu:\n");
                 displayPosition(p);
                 displayPosition(temp);
-                printf("Ban muon xoa khong?\n1. Yes\n2. No");
+                printf("Ban muon xoa phan tu nao?\n1. Phan tu dau\n2. Phan tu sau\n3. Khong xoa");
                 int choose;
                 scanf("%d", &choose);
-                if (choose == 1)
-                {
-                    delete (*L, p);
-                    delete (temp, p);
+                Position toDelete = NULL;
+                switch (choose) {
+                    case 1:
+                        toDelete = p;
+                        p = p->prev; // Di chuyển p lùi lại trước khi xóa để tiếp tục duyệt
+                        break;
+                    case 2:
+                        toDelete = temp;
+                        break;
+                    default:
+                        break;
+                }
+                if (toDelete != NULL) {
+                    delete1(*L, toDelete);
+                    foundDuplicates = 1;
                 }
             }
             temp = temp->next;
         }
-        p = p->next;
+        if (p != NULL) p = p->next;
     }
+    return foundDuplicates;
 }
 
 void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
@@ -496,8 +550,9 @@ void Doc_Danh_Sach_So_Dien_Thoai(FILE *filein, List pL)
 /*                  */
 int main()
 {
+    system("cls");
     struct NumberInfo s1 = setNumber("0328981817", "Da Nang", "Danh", "DHBK");
-    struct NumberInfo s2 = setNumber("0328981817", "Da Nang", "Em", "DHBK");
+    struct NumberInfo s2 = setNumber("0328981817", "Quang Binh", "Em", "DHBK");
     struct NumberInfo s3 = setNumber("0328981818", "Ha Noi", "Dat", "DHBK");
 
     List Contacts = create();
@@ -538,10 +593,14 @@ int main()
     add(&Contacts, s3, 1);
     display(Contacts);
 
+    printf("Arrange: \n");
+    Arrange(&Contacts, true);
+    display(Contacts);
+
     // unfixed
     printf("L: \n");
-    // duplicate(Contacts);
-    // display(Contacts);
+    duplicate(Contacts);
+    display(Contacts);
 
     free(Contacts);
     free(p);
