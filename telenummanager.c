@@ -61,6 +61,7 @@ List create()
 // nhap vao mot so dien thoai moi va them vao contacts L
 void viethoa(char *str) {
     int length = strlen(str);
+    int i;
 
     // Đặt chữ cái đầu tiên của chuỗi thành chữ hoa
     if (length > 0) {
@@ -68,7 +69,7 @@ void viethoa(char *str) {
     }
 
     // Lặp qua các ký tự của chuỗi
-    for (int i = 1; i < length; i++) {
+    for (i = 1; i < length; i++) {
         // Nếu là khoảng trắng và ký tự sau nó là một ký tự thường,
         // thì chuyển ký tự đó thành chữ hoa
         if (isspace(str[i]) && islower(str[i + 1])) {
@@ -157,7 +158,7 @@ struct NumberInfo setNumber(char *number, char *city, char *owner, char *address
     return one;
 }
 
-void setNumber(List L) {
+void setNumber1(List L) {
     struct NumberInfo one;
     char str[100];
 
@@ -198,7 +199,7 @@ void setNumber(List L) {
 //-----------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 // in danh sách thông tin tất cả danh bạ
-void Display(List L) {
+void display(List L) {
     printf("\n");    
     int count = 1;
     Position current = L->next;
@@ -463,15 +464,13 @@ void swapNodes(List *pL, Position first, Position second) {
 // Tìm và thông báo nếu có trùng lặp, xóa
 int duplicate(List *L)
 {
-    Position p = *L, temp;
-    int foundDuplicates = 0;
-    int needRestart = 0;
-
     Position p = *L, temp, nextTemp;
+    int foundDuplicates = 0;
 
-    while (p->next != NULL) { // Không cần kiểm tra nếu p là phần tử cuối cùng
+    while (p != NULL && p->next != NULL) {
         temp = p->next;
         while (temp != NULL) {
+            nextTemp = temp->next; // Lưu trữ con trỏ tiếp theo của temp
             if ((p->value.number == temp->value.number)==0 && strcmp(p->value.city, temp->value.city) == 0) {
                 printf("Co su trung lap giua hai phan tu:\n");
                 displayPosition(p);
@@ -479,26 +478,24 @@ int duplicate(List *L)
                 printf("Ban muon xoa phan tu nao?\n1. Phan tu dau\n2. Phan tu sau\n3. Khong xoa\n");
                 int choose;
                 scanf("%d", &choose);
-                Position toDelete = NULL;
                 switch (choose) {
                     case 1:
-                        toDelete = p;
-                        p = p->prev; // Di chuyển p lùi lại trước khi xóa để tiếp tục duyệt
+                        delete1(L, p);
+                        p = p->prev; // Cập nhật lại p sau khi xóa
+                        if (p == NULL) p = *L; // Nếu p là null, đặt lại về đầu danh sách
+                        else p = p->next; // Nếu không, tiếp tục từ phần tử tiếp theo
                         break;
                     case 2:
-                        toDelete = temp;
+                        delete1(*L, temp);
                         break;
                     default:
                         break;
                 }
-                if (toDelete != NULL) {
-                    delete1(*L, toDelete);
-                    foundDuplicates = 1;
-                }
+                if (choose != 3) foundDuplicates = 1;
             }
             temp = nextTemp;
         }
-        if (p != NULL) p = p->next;
+        if (p != NULL) p = p->next; // Tiếp tục di chuyển p đến phần tử tiếp theo
     }
     return foundDuplicates;
 }
@@ -541,7 +538,7 @@ void Doc_Danh_Sach_So_Dien_Thoai(List *pL) {
     while (!feof(f)) {
         Doc_File_Thong_Tin_So_Dien_Thoai(f, &e);
         if (e.number != NULL) {
-            InsertFirst(*pL, e);
+            insertFirst(pL, e);
         }
     }
     fclose(f);
