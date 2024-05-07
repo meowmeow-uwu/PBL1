@@ -88,51 +88,60 @@ void insertFirst(List *pL, struct NumberInfo num)
 }
 
 // nhap vao mot so dien thoai moi va them vao contacts L
-void setNumber1(List L)
-{
+void viethoa(char *str) {
+    int length = strlen(str);
+
+    // Đặt chữ cái đầu tiên của chuỗi thành chữ hoa
+    if (length > 0) {
+        str[0] = toupper(str[0]);
+    }
+
+    // Lặp qua các ký tự của chuỗi
+    for (int i = 1; i < length; i++) {
+        // Nếu là khoảng trắng và ký tự sau nó là một ký tự thường,
+        // thì chuyển ký tự đó thành chữ hoa
+        if (isspace(str[i]) && islower(str[i + 1])) {
+            str[i + 1] = toupper(str[i + 1]);
+        }
+    }
+}
+void setNumber(List L) {
     unsigned long m;
     char str[100];
-    struct NumberInfo one;
-
-    printf("So dien thoai: ");
-
+    NumberInfo one;
+    for(;;)
+    {
+    printf("\nSo dien thoai: ");
     int chck = scanf("%lu", &m);
     getchar();
-    for (;;)
-    {
-        if (chck != 1)
-        {
-            printf("\nKhong hop le, vui long nhap lai!!!\n");
-            continue;
-        }
-        else
-        {
-            one.number = m;
-            break;
-        }
+    if (chck != 1) {printf("\nKhong hop le, vui long nhap lai!!!\n");continue;}
+    else {one.number = m;break;}
     }
     printf("Nha mang: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
+    viethoa(str);
     one.nhamang = strdup(str);
 
     printf("Chu so huu: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
+    viethoa(str);
     one.owner = strdup(str);
 
     printf("Dia chi: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
+    viethoa(str);
     one.address = strdup(str);
 
     printf("Thanh pho: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
+    viethoa(str);
     one.city = strdup(str);
-    //**************************************************************
-    //********** nên linh hoạt bằng con trỏ hàm hoặc switch case:))
-    insertFirst(L, one);
+
+    InsertFirst(L, one);
 }
 
 // in danh sách thông tin tất cả danh bạ
