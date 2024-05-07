@@ -106,17 +106,14 @@ void viethoa(char *str) {
     }
 }
 void setNumber(List L) {
-    unsigned long m;
-    char str[100];
     NumberInfo one;
-    for(;;)
-    {
+    char str[100];
+
     printf("\nSo dien thoai: ");
-    int chck = scanf("%lu", &m);
-    getchar();
-    if (chck != 1) {printf("\nKhong hop le, vui long nhap lai!!!\n");continue;}
-    else {one.number = m;break;}
-    }
+    fgets(str, sizeof(str), stdin);
+    str[strcspn(str, "\n")] = '\0';
+    one.number = strdup(str);
+
     printf("Nha mang: ");
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
@@ -145,21 +142,26 @@ void setNumber(List L) {
 }
 
 // in danh sách thông tin tất cả danh bạ
-void display(List L)
-{
-    printf("\n");
+void Display(List L) {
+    printf("\n");    
     int count = 1;
-    while (L != NULL)
-    {
-        printf("%d. -Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", count++, L->value.number, L->value.city, L->value.owner, L->value.address);
-        L = L->next;
+    Position current = L->next;
+    printf("\033[0;31mSTT\033[0m |    \033[0;31mSDT\033[0m     |  \033[0;31mNHA MANG\033[0m  |      \033[0;31mCHU SO HUU\033[0m      |             \033[0;31mDIA CHI    \033[0m             |    \033[0;31mTINH THANH  \033[0m  \n");
+    while (current != NULL) {
+        printf("\033[1;34m%-2d \033[0m | \033[1;32m%-10s \033[0m| \033[1;32m%-10s \033[0m| \033[1;32m%-20s\033[0m | \033[1;32m%-35s\033[0m | \033[1;32m%-15s\033[0m\n",
+               count++, current->value.number, current->value.nhamang,
+               current->value.owner, current->value.address, current->value.city);
+        current = current->next;
     }
     printf("\n");
 }
 
 void displayPosition(Position p)
 {
-    printf("-Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", p->value.number, p->value.city, p->value.owner, p->value.address);
+    printf("\033[1;34m%-2d \033[0m | \033[1;32m%-10s \033[0m| \033[1;32m%-10s \033[0m| \033[1;32m%-20s\033[0m | \033[1;32m%-35s\033[0m | \033[1;32m%-15s\033[0m\n",
+                p->value.number, p->value.nhamang,
+               p->value.owner, p->value.address, p->value.city);
+       
 }
 
 void displayCity(List L)
@@ -387,6 +389,41 @@ void listCity(List L, int choose)
     }
 }
 
+List Nhamang(List L)
+{
+    List Nhamang = create();
+    Nhamang = NULL;
+    Position q;
+
+    if (L != NULL)
+        q = insert(&Nhamang, L->value, Nhamang);
+    while (L != NULL)
+    {
+        if (find(Nhamang, nhamang, L->value.nhamang) == NULL)
+            q = insert(&Nhamang, L->value, q);
+        L = L->next;
+    }
+
+    return Nhamang;
+}
+
+// liệt kê danh bạ từng nha mang + thống kê số lượng thuê bao
+void ListNhamang(List L, int choose)
+{
+    List ListNhamang = Nhamang(L);
+    List findNhamang;
+    int count;
+    while (ListNhamang != NULL)
+    {
+        findNhamang = findAll(L, nhamang, ListNhamang->value.nhamang, &count);
+        printf("%s: ", ListNhamang->value.nhamang);
+        printf("%d\n", count);
+        if (choose == 4)
+            display(findNhamang);
+        ListNhamang = ListNhamang->next;
+    }
+}
+
 void swapNodes(List *pL, Position first, Position second)
 {
     char *tempcity = first->value.city; // Giả sử là chỉ đổi tên
@@ -433,48 +470,6 @@ void Arrange1() {} // theo alphabe up,down
 void Arrange2() {}
 
 void Arrange3() {}
-
-// thống kê số lượng thuê bao theo tỉnh thành
-void countPhonesByCity(List L)
-{
-    const char *provinces[] = {
-        "Ha Noi", "Ha Giang", "Cao Bang", "Bac Kan", "Tuyen Quang", "Lao Cai",
-        "Dien Bien", "Lai Chau", "Son La", "Yen Bai", "Hoa Binh", "Thai Nguyen",
-        "Lang Son", "Bac Giang", "Phu Tho", "Vinh Phuc", "Quang Ninh", "Bac Ninh",
-        "Hai Duong", "Hung Yen", "Ha Nam", "Nam Dinh", "Thai Binh", "Ninh Binh",
-        "Thanh Hoa", "Nghe An", "Ha Tinh", "Quang Binh", "Quang Tri", "Thua Thien Hue",
-        "Da Nang", "Quang Nam", "Quang Ngai", "Binh Dinh", "Phu Yen", "Khanh Hoa",
-        "Ninh Thuan", "Binh Thuan", "Kon Tum", "Gia Lai", "Dak Lak", "Dak Nong",
-        "Lam Dong", "Binh Phuoc", "Tay Ninh", "Binh Duong", "Dong Nai", "Ba Ria - Vung Tau",
-        "Long An", "Tien Giang", "Ben Tre", "Dong Thap", "An Giang", "Kien Giang",
-        "Can Tho", "Hau Giang", "Soc Trang", "Tra Vinh", "Bac Lieu", "Ca Mau"};
-
-    int counts[62] = {0}; // Mảng đếm số điện thoại cho mỗi tỉnh thành
-    int i;
-    Position current = L->next;
-    while (current != NULL)
-    {
-        char *city = current->value.city;
-        for (i = 0; i < 62; ++i)
-        {
-            if (strcmp(provinces[i], city) == 0)
-            {
-                counts[i]++;
-                break;
-            }
-        }
-        current = current->next;
-    }
-
-    printf("Thong ke so dien thoai theo tinh thanh:\n");
-    for (i = 0; i < 62; ++i)
-    {
-        if (counts[i] > 0)
-        {
-            printf("%s: %d so dien thoai\n", provinces[i], counts[i]);
-        }
-    }
-}
 
 void delete1(List *L, Position p)
 {
@@ -549,41 +544,45 @@ int duplicate(List *L)
     return foundDuplicates;
 }
 
-void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
-{
+void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, NumberInfo *e) {
     char line[256];
-    if (fgets(line, sizeof(line), filein) != NULL)
-    {
-        // Sử dụng strtok để tách các trường thông tin từ dòng đọc được
+    if (fgets(line, sizeof(line), filein) != NULL) {
+        // Loại bỏ ký tự xuống dòng cuối dòng
+        line[strcspn(line, "\n")] = '\0';
+
         char *token = strtok(line, ",");
-        e->number = strdup(token); // Sao chép và lưu trữ số điện thoại
+        e->number = strdup(token);
 
         token = strtok(NULL, ",");
-        e->nhamang = strdup(token); // Sao chép và lưu trữ nhà mạng
+        e->nhamang = strdup(token);
 
         token = strtok(NULL, ",");
-        e->owner = strdup(token); // Sao chép và lưu trữ tên chủ sở hữu
+        e->owner = strdup(token);
 
         token = strtok(NULL, ",");
-        e->address = strdup(token); // Sao chép và lưu trữ địa chỉ
+        e->address = strdup(token);
 
-        token = strtok(NULL, "\n");
-        e->city = strdup(token); // Sao chép và lưu trữ thành phố
+        token = strtok(NULL, ",");
+        e->city = strdup(token);
     }
 }
 
 // Hàm đọc danh sách số điện thoại từ file
-void Doc_Danh_Sach_So_Dien_Thoai(FILE *filein, List pL)
-{
-    struct NumberInfo e;
-    while (!feof(filein))
-    {
-        Doc_File_Thong_Tin_So_Dien_Thoai(filein, &e);
-        if (e.number != NULL)
-        {
-            insertFirst(pL, e);
+void Doc_Danh_Sach_So_Dien_Thoai(List *pL) {
+    FILE *f = fopen("numberInfo.TXT", "r");
+    if (f == NULL) {
+        fprintf(stderr, "Khong mo duoc file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    NumberInfo e;
+    while (!feof(f)) {
+        Doc_File_Thong_Tin_So_Dien_Thoai(f, &e);
+        if (e.number != NULL) {
+            InsertFirst(*pL, e);
         }
     }
+    fclose(f);
 }
 
 /*                  */
