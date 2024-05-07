@@ -130,7 +130,7 @@ void setNumber1(List L)
     fgets(str, sizeof(str), stdin);
     str[strcspn(str, "\n")] = '\0';
     one.city = strdup(str);
-//**************************************************************
+    //**************************************************************
     //********** nên linh hoạt bằng con trỏ hàm hoặc switch case:))
     insertFirst(L, one);
 }
@@ -190,7 +190,6 @@ Position insert(List *pL, struct NumberInfo e, Position p)
 
 // chèn bất kỳ
 void insertM() {}
-
 
 // chèn vào đầu hoặc cuối danh sách
 void add(List *L, struct NumberInfo num, int choose)
@@ -379,33 +378,37 @@ void listCity(List L, int choose)
     }
 }
 
-void swapNodes(List *pL, Position first, Position second) {
-    char* tempcity = first->value.city; // Giả sử là chỉ đổi tên
+void swapNodes(List *pL, Position first, Position second)
+{
+    char *tempcity = first->value.city; // Giả sử là chỉ đổi tên
     first->value.city = second->value.city;
     second->value.city = tempcity;
 }
 
 // sắp xếp theo các tiêu chí, @override
-void Arrange1() {} // theo alphabe up,down
-
-void Arrange(List *pL, bool ascending) {
+void Arrange(List *pL, bool ascending)
+{
     bool swapped;
     Position current, next, lastPtr = NULL;
 
     /* Kiểm tra danh sách có rỗng không hoặc chỉ có một phần tử */
-    if (*pL == NULL || (*pL)->next == NULL) {
+    if (*pL == NULL || (*pL)->next == NULL)
+    {
         return;
     }
 
-    do {
+    do
+    {
         swapped = false;
         current = *pL;
 
-        while (current->next != lastPtr) {
+        while (current->next != lastPtr)
+        {
             next = current->next;
             // So sánh và quyết định điều kiện dựa trên biến 'ascending'
             if ((ascending && strcmp(current->value.city, next->value.city) > 0) ||
-                (!ascending && strcmp(current->value.city, next->value.city) < 0)) {
+                (!ascending && strcmp(current->value.city, next->value.city) < 0))
+            {
                 // Đoạn này giả sử rằng ta có hàm swapNodes để hoán đổi hai phần tử
                 swapNodes(pL, current, next);
                 swapped = true;
@@ -415,6 +418,8 @@ void Arrange(List *pL, bool ascending) {
         lastPtr = current; // cập nhật phần tử cuối cùng đã được sắp xếp
     } while (swapped);
 }
+
+void Arrange1() {} // theo alphabe up,down
 
 void Arrange2() {}
 
@@ -464,48 +469,73 @@ void countPhonesByCity(List L)
 
 void delete1(List *L, Position p)
 {
-    if (p->prev != NULL) p->prev->next = p->next;
-    if (p->next != NULL) p->next->prev = p->prev;
-    if (p == *L) *L = p->next; // Nếu xóa phần tử đầu danh sách
+    if (p->prev != NULL)
+        p->prev->next = p->next;
+    if (p->next != NULL)
+        p->next->prev = p->prev;
+    if (p == *L)
+        *L = p->next; // Nếu xóa phần tử đầu danh sách
     free(p);
 }
 
 // Tìm và thông báo nếu có trùng lặp, xóa
 int duplicate(List *L)
 {
-    Position p = *L, temp;
     int foundDuplicates = 0;
+    int needRestart = 0;
 
-    while (p->next != NULL) { // Không cần kiểm tra nếu p là phần tử cuối cùng
+    Position p = *L, temp, nextTemp;
+
+    while (p != NULL && p->next != NULL)
+    {
         temp = p->next;
-        while (temp != NULL) {
-            if ((p->value.number == temp->value.number)==0 && strcmp(p->value.city, temp->value.city) == 0) {
+        while (temp != NULL)
+        {
+            nextTemp = temp->next; // Lưu trữ con trỏ tiếp theo của temp
+            if ((p->value.number == temp->value.number) == 0 && strcmp(p->value.city, temp->value.city) == 0)
+            {
                 printf("Co su trung lap giua hai phan tu:\n");
                 displayPosition(p);
                 displayPosition(temp);
-                printf("Ban muon xoa phan tu nao?\n1. Phan tu dau\n2. Phan tu sau\n3. Khong xoa");
+                printf("Ban muon xoa phan tu nao?\n1. Phan tu dau\n2. Phan tu sau\n3. Khong xoa\n");
                 int choose;
                 scanf("%d", &choose);
-                Position toDelete = NULL;
-                switch (choose) {
-                    case 1:
-                        toDelete = p;
-                        p = p->prev; // Di chuyển p lùi lại trước khi xóa để tiếp tục duyệt
-                        break;
-                    case 2:
-                        toDelete = temp;
-                        break;
-                    default:
-                        break;
+                switch (choose)
+                {
+                case 1:
+                    delete1(*L, p);
+                    printf("Deleted!\n");
+                    p = p->prev; // Cập nhật lại p sau khi xóa
+                    if (p == NULL)
+                        p = *L; // Nếu p là null, đặt lại về đầu danh sách
+                    else
+                        p = p->next; // Nếu không, tiếp tục từ phần tử tiếp theo
+                    needRestart = 1;
+                    break;
+                case 2:
+                    delete1(*L, temp);
+                    printf("Deleted!\n");
+                    needRestart = 1;
+                    break;
+                default:
+                    printf("\n");
+                    break;
                 }
-                if (toDelete != NULL) {
-                    delete1(*L, toDelete);
-                    foundDuplicates = 1;
-                }
+                if (needRestart)
+                    break; // Thoát khỏi vòng lặp nội bộ nếu cần khởi động lại
+                foundDuplicates = 1;
             }
-            temp = temp->next;
+            temp = nextTemp;
         }
-        if (p != NULL) p = p->next;
+        if (needRestart)
+        {
+            needRestart = 0; // Đặt lại cờ và bắt đầu lại từ đầu danh sách
+            p = *L;
+        }
+        else
+        {
+            p = p->next; // Chỉ tiếp tục nếu không cần khởi động lại
+        }
     }
     return foundDuplicates;
 }
@@ -552,6 +582,7 @@ int main()
 {
     system("cls");
     struct NumberInfo s1 = setNumber("0328981817", "Da Nang", "Danh", "DHBK");
+    struct NumberInfo s4 = setNumber("0328981817", "Da Nang", "Danh", "DHBK");
     struct NumberInfo s2 = setNumber("0328981817", "Quang Binh", "Em", "DHBK");
     struct NumberInfo s3 = setNumber("0328981818", "Ha Noi", "Dat", "DHBK");
 
@@ -591,6 +622,7 @@ int main()
 
     printf("\nham add: \n");
     add(&Contacts, s3, 1);
+    insert(&Contacts, s4, p);
     display(Contacts);
 
     printf("Arrange: \n");
@@ -599,7 +631,7 @@ int main()
 
     // unfixed
     printf("L: \n");
-    duplicate(Contacts);
+    duplicate(&Contacts);
     display(Contacts);
 
     free(Contacts);
