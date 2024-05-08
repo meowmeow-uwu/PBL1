@@ -45,6 +45,32 @@ List create()
     return L;
 }
 
+int countList(List L)
+{
+    int count = 0;
+    while (L != NULL)
+    {
+        ++count;
+        L = L->next;
+    }
+    return count;
+}
+
+Position findex(List L, int index)
+{
+    if (index > countList(L))
+        return NULL;
+
+    Position p = L;
+    int count = 1;
+    while (count != index)
+    {
+        ++count;
+        p = p->next;
+    }
+    return p;
+}
+
 /*-------------------------------------------------INSERT--------------------------------------------------*/
 //------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------
@@ -134,7 +160,18 @@ void add(List *L, struct NumberInfo num, int choose)
 }
 
 // chèn bất kỳ
-void insertM() {}
+void insertP(List *L, struct NumberInfo e, int index)
+{
+    Position p = findex(*L, index);
+    if (p == NULL)
+    {
+        printf("\nElement non-exist!\n");
+        return;
+    }
+    if(index == 1) insertFirst(L,e);
+    else
+    insert(L, e, p->prev);
+}
 
 /*-------------------------------------------------SET NUMBER-------------------------------------------------------*/
 //--------------------------------------------------------------------------------------------------------------------
@@ -323,35 +360,29 @@ void swapNodes(List *pL, Position first, Position second)
 }
 
 // sắp xếp theo các tiêu chí, @override
-void Arrange(List *pL, int ascending)
-{
+void Arrange(List *pL, int (*compare)(struct NumberInfo, char *), int ascending) {
     int swapped;
     Position L, next, lastPtr = NULL;
 
-    /* Kiểm tra danh sách có rỗng không hoặc chỉ có một phần tử */
-    if (*pL == NULL || (*pL)->next == NULL)
-    {
+    if (*pL == NULL || (*pL)->next == NULL) {
         return;
     }
 
-    do
-    {
+    do {
         swapped = 0;
         L = *pL;
 
-        while (L->next != lastPtr)
-        {
+        while (L->next != lastPtr) {
             next = L->next;
-            // So sánh và quyết định điều kiện dựa trên biến 'ascending'
-            if ((ascending && strcmp(L->value.city, next->value.city) > 0) ||
-                (!ascending && strcmp(L->value.city, next->value.city) < 0))
-            {
+            // Sử dụng con trỏ hàm để so sánh
+            if ((ascending && compare(L->value, next->value.city) > 0) ||
+                (!ascending && compare(L->value, next->value.city) < 0)) {
                 swapNodes(pL, L, next);
                 swapped = 1;
             }
             L = next;
         }
-        lastPtr = L; // cập nhật phần tử cuối cùng đã được sắp xếp
+        lastPtr = L;
     } while (swapped);
 }
 
@@ -373,6 +404,17 @@ void delete(List *L, Position p)
         p->next->prev = p->prev;
 
     free(p);
+}
+
+void deleteP(List *L, int index)
+{
+    Position p = findex(*L, index);
+    if (p == NULL)
+    {
+        printf("\nElement non-exist!\n");
+        return;
+    }
+    delete (L, p);
 }
 
 // Tìm và thông báo nếu có trùng lặp, xóa
@@ -519,10 +561,10 @@ void sapxeptheo()
 int main()
 {
     system("cls");
-    struct NumberInfo s1 = setNumber("0328981817", "Da Nang", "Danh", "DHBK");
-    struct NumberInfo s4 = setNumber("0328981817", "Da Nang", "Danh", "DHBK");
-    struct NumberInfo s2 = setNumber("0328981817", "Quang Binh", "Em", "DHBK");
-    struct NumberInfo s3 = setNumber("0328981818", "Ha Noi", "Dat", "DHBK");
+    struct NumberInfo s1 = setNumber("0328981817", "Ca Nang", "Danh", "DHBK");
+    struct NumberInfo s2 = setNumber("0328981817", "Ba Nang", "Danh", "DHBK");
+    struct NumberInfo s3 = setNumber("0328981817", "Auang Binh", "Em", "DHBK");
+    struct NumberInfo s4 = setNumber("0328981818", "Aa Noi", "Dat", "DHBK");
 
     List Contacts = create();
     Contacts = NULL;
@@ -546,7 +588,7 @@ int main()
     //
     printf("\nHam delete: \n");
     delete (&Contacts, p);
-    display(p,0);
+    display(p, 0);
     // p = find(Contacts, number, c);
     // if (p != NULL) {
     //     delete1(&Contacts, p);
@@ -573,7 +615,7 @@ int main()
 
     // 0 là giảm dần, 1 là tăng dần
     printf("Arrange: \n");
-    Arrange(&Contacts, 1);
+    Arrange(&Contacts, findCity , 0);
     display(Contacts, 1);
 
     // unfixed
@@ -584,6 +626,13 @@ int main()
     }
     else
         printf("\nKhong co phan tu trung lap!\n");
+    printf("delete\n");
+    deleteP(&Contacts, 1);
+    display(Contacts, 1);
+
+    printf("index\n");
+    insertP(&Contacts, s4, 1);
+    display(Contacts, 1);
 
     free(Contacts);
     free(p);
