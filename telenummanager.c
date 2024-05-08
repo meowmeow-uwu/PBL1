@@ -97,23 +97,20 @@ void viethoa(char *str)
     }
 }
 
-void insertFirst(List *pL, struct NumberInfo num)
+void insertFirst(List pL, struct NumberInfo num)
 {
     Position newItem = malloc(sizeof(struct Node));
 
-    // if (newItem == NULL){
-    //     fprintf(stderr, "Memory allocation failed.\n");
-    //     return;}
-
+ 
     newItem->value = num;
-    newItem->next = *pL;
-    newItem->prev = NULL;
+    newItem->next = pL->next;
+    newItem->prev = pL;
 
-    if (*pL != NULL)
+    if (newItem->next != NULL)
     {
-        (*pL)->prev = newItem;
+        newItem->next->prev = newItem;
     }
-    *pL = newItem;
+   
 }
 
 // chèn vị trí bất kì
@@ -176,19 +173,9 @@ void insertP(List *L, struct NumberInfo e, int index)
 //--------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 // create one new number element
-struct NumberInfo setNumber(char *number, char *city, char *owner, char *address)
-{
-    struct NumberInfo one;
 
-    one.number = strdup(number);
-    one.city = strdup(city);
-    one.owner = strdup(owner);
-    one.address = strdup(address);
 
-    return one;
-}
-
-void setNumber1(List L)
+struct NumberInfo setNumber()
 {
     struct NumberInfo one;
     char str[100];
@@ -215,9 +202,8 @@ void setNumber1(List L)
     str[strcspn(str, "\n")] = '\0';
     viethoa(str);
     one.city = strdup(str);
-    //**************************************************************
-    //********** nên linh hoạt bằng con trỏ hàm hoặc switch case:))
-    insertFirst(L, one);
+    
+    return one;
 }
 
 /*-------------------------------------------------DISPLAY----------------------------------------------------------*/
@@ -332,7 +318,7 @@ List City(List L)
 }
 
 // liệt kê danh bạ từng tỉnh thành + thống kê số lượng thuê bao
-void listCity(List L, int choose) // choose sẽ được handle trong main (switch case)
+void listCity(List L, int choose) // choose=0 là thống kê,choose=1 là liệt kê.
 {
     List listCity = City(L);
     List findCities;
@@ -340,9 +326,10 @@ void listCity(List L, int choose) // choose sẽ được handle trong main (swi
     while (listCity != NULL)
     {
         findCities = findAll(L, findCity, listCity->value.city, &count);
-        printf("%s: ", listCity->value.city);
-        printf("%d\n", count);
-        if (choose == 4)
+        if (choose==0)
+       { printf("%s: ", listCity->value.city);
+        printf("%d\n", count);}
+        if (choose == 1)
             display(findCities, 1);
         listCity = listCity->next;
     }
@@ -417,10 +404,10 @@ void deleteP(List *L, int index)
 }
 
 // Tìm và thông báo nếu có trùng lặp, xóa
-int duplicate(List *L)
+void duplicate(List *L,int *foundDuplicates)
 {
     Position p = *L, temp, nextTemp;
-    int foundDuplicates = 0;
+    
 
     while (p != NULL && p->next != NULL)
     {
@@ -428,8 +415,9 @@ int duplicate(List *L)
         while (temp != NULL)
         {
             nextTemp = temp->next; // Lưu trữ con trỏ tiếp theo của temp
-            if ((p->value.number == temp->value.number) == 0 && strcmp(p->value.city, temp->value.city) == 0)
+            if (p->value.number == temp->value.number)
             {
+                *foundDuplicates==1;
                 printf("Co su trung lap giua hai phan tu:\n");
                 display(p, 0);
                 display(temp, 0);
@@ -458,9 +446,9 @@ int duplicate(List *L)
             temp = nextTemp;
         }
         if (p != NULL)
-            p = p->next; // Tiếp tục di chuyển p đến phần tử tiếp theo
+            p = p->next; 
     }
-    return foundDuplicates;
+   
 }
 
 /*---------------------------------------------------FILE HANDLING------------------------------------------------------*/
@@ -531,7 +519,7 @@ void menu()
 
 void edit()
 {
-    printf("\n1. Insert/add\n2. Search\n3. Arrange\n4. Delete\n");
+    printf("\n1. Insert/add\n2. Arrange\n3. Delete\n");
 }
 
 void chen()
@@ -637,3 +625,186 @@ int main()
     free(p);
     return 0;
 }
+
+
+//------------XONG HÀM MAIN,CHƯA HOÀN THÀNH OPTION 3 (THÊM, XÓA, SẮP XẾP)-----------
+
+
+//
+//
+//void menu(int *choice){
+//    float choice;
+//        int chck;
+//
+//		printf("\t           --------MENU--------\n");
+//		printf("\t  ------------------------------------\n");
+//		printf("\t |1. DOC FILE LAY DU LIEU             |      \n");
+//		printf("\t |2. HIEN THI DANH BA                 |     \n");
+//		printf("\t |3. CHINH SUA DANH BA                |     \n");
+//		printf("\t |4. TIM KIEM THEO TIEU CHI           |     \n");
+//		printf("\t |5. LIET KE THEO TINH THANH          |     \n");
+//		printf("\t |6. THONG KE SO LUONG THEO TINH THANH|     \n");
+//		printf("\t |7. THONG BAO NEU CO TRUNG LAP VA XOA|     \n");
+//		printf("\t |8. THOAT                            |     \n");
+//		printf("\t  ------------------------------------\n");
+//
+//		for(;;)
+//        {
+//            printf("\nYour choice: ");
+//            chck=scanf("%d", choice);
+//            getchar();
+//            if(!(chck==1 && *choice >= 1 && *choice <= 7)){
+//                printf("Invalid input!! Please choose again.\n");
+//			continue;}
+//			else break;
+//        }
+//	}
+//
+//void option1()
+//{
+//    Doc_Danh_Sach_So_Dien_Thoai(&pL);
+//    display(Contacts,1);
+//
+//}
+//
+//void option2()
+//{
+//    display(Contacts,1);
+//}
+//
+//void option3()
+//
+//{       int chck;float choice;
+//        printf("\t  --------------------------------------------\n");
+//		printf("\t |1. THEM SO DIEN THOAI VAO DAU DANH BA       |     \n");
+//		printf("\t |2. THEM SO DIEN THOAI VAO VI TRI BAT KY     |     \n");
+//		printf("\t |3. SAP XEP THEO TINH THANH                  |     \n");
+//		printf("\t |4. SAP XEP THEO NHA MANG                    |     \n");
+//		printf("\t |5. SAP XEP THEO TEN CHU SO HUU              |     \n");
+//		printf("\t |6. XOA MOT SO DIEN THOAI                    |\n");
+//		printf("\t |7. TRO VE MENU                              |     \n");
+//		printf("\t  --------------------------------------------\n");
+//		for(;;)
+//        {
+//            printf("\nYour choice: ");
+//            chck=scanf("%d",&choice);
+//            getchar();
+//            if(!(chck==1 && choice >= 1 && choice <= 7)){
+//                printf("Invalid input!! Please choose again.\n");
+//			continue;}
+//			else break;
+//        }
+//        switch (choice){
+//                case 1:{struct NumberInfo e=setnumber();insertFirst(Contacts,e);}
+//                case 2:{}
+//                case 3:{}
+//                case 4:{}
+//                case 5:{}
+//                case 6:{}
+//                case 7:{printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}}
+//        }
+//}
+//
+//void option4()
+//{
+//{       int chck;float choice;
+//        printf("\t  --------------TIM KIEM THEO--------------\n");
+//		printf("\t |1. SDT                                   |     \n");
+//		printf("\t |2. TINH THANH                            |     \n");
+//		printf("\t |3. DIA CHI                               |     \n");
+//		printf("\t |4. CHU SO HUU                            |      \n");		
+//		printf("\t |5. TRO VE MENU                           |     \n");
+//		printf("\t  -----------------------------------------\n");
+//		for(;;)
+//        {
+//            printf("\nYour choice: ");
+//            chck=scanf("%d",&choice);
+//            getchar();
+//            if(!(chck==1 && choice >= 1 && choice <= 5)){
+//                printf("Invalid input!! Please choose again.\n");
+//			continue;}
+//			else break;
+//        }
+//        switch (choice){
+//            case 1 :{char str[100];printf("VUI LONG NHAP SDT MUON TIM :";fgets(str, sizeof(str), stdin);str[strcspn(str, "\n")] = '\0';
+//                        List findby;
+//                        findby = findAll(Contacts, findNumber, c, &count);
+//                        if (findby != NULL)
+//                                {printf("FOUND: ");display(findby,1)}
+//                        else
+//                        printf("NOT FOUND\n");
+//                        printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 2: {char str[100];printf("VUI LONG NHAP TEN TINH THANH :";fgets(str, sizeof(str), stdin);str[strcspn(str, "\n")] = '\0';viethoa(str);
+//                        List findby;
+//                        findby = findAll(Contacts, findCity, c, &count);
+//                        if (findby != NULL)
+//                                {printf("FOUND: ");display(findby,1)}
+//                        else
+//                        printf("NOT FOUND\n");
+//                        printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 3: {char str[100];printf("VUI LONG NHAP TEN DIA CHI :";fgets(str, sizeof(str), stdin);str[strcspn(str, "\n")] = '\0';viethoa(str);
+//                        List findby;
+//                        findby = findAll(Contacts, findAddress, c, &count);
+//                        if (findby != NULL)
+//                                {printf("FOUND: ");display(findby,1)}
+//                        else
+//                        printf("NOT FOUND\n");
+//                        printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 4:{char str[100];printf("VUI LONG NHAP TEN CHU SO HUU :";fgets(str, sizeof(str), stdin);str[strcspn(str, "\n")] = '\0';viethoa(str);
+//                        List findby;
+//                        findby = findAll(Contacts, findAddress, c, &count);
+//                        if (findby != NULL)
+//                                {printf("FOUND: ");display(findby,1)}
+//                        else
+//                        printf("NOT FOUND\n");
+//                        printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 5: {printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}}
+//
+//}
+//}
+//}
+//
+//void option5()
+//{
+//    listCity(Contacts,1);
+//}
+//
+//void option6()
+//{
+//    listCity(Contacts,0);
+//}
+//
+//void option7()
+//{int fouduplicate=0;
+//    duplicate(&Contacts,&fouduplicate);
+//    if (fouduplicate==1)
+//    {
+//        printf("\nKHONG CO SU TRUNG LAP!!!\n");
+//    }
+//}
+//
+//int main()
+//{
+//    List Contacts = create();int choice;
+//    menu:
+//        menu(&choice);
+//    switch (choice):
+//        {
+//            case 1: {option1();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 2: {option2();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 3: {option3();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 4: {option4();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 5: {option5();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 6: {option6();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 7: {option7();printf("\n Nhan phim bat ky de quay lai menu: ");getch();break;}
+//            case 8: exit(0);
+//        }
+//        system("cls");
+//        goto menu;
+//        return 0;
+//}
+//
+//
+//
+
+
