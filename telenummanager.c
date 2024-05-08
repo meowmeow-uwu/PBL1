@@ -167,9 +167,10 @@ void insertP(List *L, struct NumberInfo e, int index)
         printf("\nElement non-exist!\n");
         return;
     }
-    if(index == 1) insertFirst(L,e);
+    if (index == 1)
+        insertFirst(L, e);
     else
-    insert(L, e, p->prev);
+        insert(L, e, p->prev);
 }
 
 /*-------------------------------------------------SET NUMBER-------------------------------------------------------*/
@@ -230,12 +231,12 @@ void display(List L, int choose) // choose = 0 <=> in 1 Position
     int count = 1;
     if (!choose && L != NULL)
     {
-        printf("-Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", L->value.number, L->value.city, L->value.owner, L->value.address);
+        printf("-Number: %s\n  -City: %s\n  -Owner: %s\n  -Address: %s\n", L->value.number, L->value.city, L->value.owner, L->value.address);
         return;
     }
     while (L != NULL)
     {
-        printf("%d. -Number: %s\n  -City: %s\n  -Unit: %s\n  -Address: %s\n", count++, L->value.number, L->value.city, L->value.owner, L->value.address);
+        printf("%d. -Number: %s\n  -City: %s\n  -Owner: %s\n  -Address: %s\n", count++, L->value.number, L->value.city, L->value.owner, L->value.address);
         L = L->next;
     }
     printf("\n");
@@ -351,31 +352,55 @@ void listCity(List L, int choose) // choose sẽ được handle trong main (swi
 /*-------------------------------------------------ARRANGE--------------------------------------------------------------*/
 //------------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------
+int compareByNumber(struct NumberInfo a, struct NumberInfo b)
+{
+    return strcmp(a.number, b.number);
+}
+
+int compareByCity(struct NumberInfo a, struct NumberInfo b)
+{
+    return strcmp(a.city, b.city);
+}
+
+int compareByOwner(struct NumberInfo a, struct NumberInfo b)
+{
+    return strcmp(a.owner, b.owner);
+}
+
+int compareByAddress(struct NumberInfo a, struct NumberInfo b)
+{
+    return strcmp(a.address, b.address);
+}
+
 void swapNodes(List *pL, Position first, Position second)
 {
-    char *tempcity = first->value.city; // Giả sử là chỉ đổi tên
-    first->value.city = second->value.city;
-    second->value.city = tempcity;
+    struct NumberInfo temp = first->value; // Lưu trữ giá trị của nút đầu tiên
+    first->value = second->value;          // Gán giá trị của nút thứ hai cho nút đầu tiên
+    second->value = temp;
 }
 
 // sắp xếp theo các tiêu chí, @override
-void Arrange(List *pL, int (*compare)(struct NumberInfo, char *), int ascending) {
+void Arrange(List *pL, int (*compare)(struct NumberInfo, struct NumberInfo), int ascending)
+{
     int swapped;
     Position L, next, lastPtr = NULL;
 
-    if (*pL == NULL || (*pL)->next == NULL) {
+    if (*pL == NULL || (*pL)->next == NULL)
+    {
         return;
     }
 
-    do {
+    do
+    {
         swapped = 0;
         L = *pL;
 
-        while (L->next != lastPtr) {
+        while (L->next != lastPtr)
+        {
             next = L->next;
-            // Sử dụng con trỏ hàm để so sánh
-            if ((ascending && compare(L->value, next->value.city) > 0) ||
-                (!ascending && compare(L->value, next->value.city) < 0)) {
+            if ((ascending && compare(L->value, next->value) > 0) ||
+                (!ascending && compare(L->value, next->value) < 0))
+            {
                 swapNodes(pL, L, next);
                 swapped = 1;
             }
@@ -384,7 +409,6 @@ void Arrange(List *pL, int (*compare)(struct NumberInfo, char *), int ascending)
         lastPtr = L;
     } while (swapped);
 }
-
 /*--------------------------------------------------DELETE && DUPLICATE-------------------------------------------------*/
 //-----------------------------------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -614,7 +638,7 @@ int main()
 
     // 0 là giảm dần, 1 là tăng dần
     printf("Arrange: \n");
-    Arrange(&Contacts, findCity , 0);
+    Arrange(&Contacts, compareByNumber, 1);
     display(Contacts, 1);
 
     // unfixed
