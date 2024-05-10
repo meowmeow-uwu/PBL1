@@ -226,7 +226,7 @@ void set(char *str, int choose)
 {
     do
     {
-        str[0] = '\0';
+        // str[0] = '\0';
         fgets(str, 100, stdin);
         str[strcspn(str, "\n")] = '\0';
         viethoa(str);
@@ -266,6 +266,10 @@ struct NumberInfo setNumber()
     one.city = strdup(str);
 
     return one;
+}
+
+void edit(List *L, char *file)
+{
 }
 
 /*-------------------------------------------------DISPLAY----------------------------------------------------------*/
@@ -536,6 +540,26 @@ int duplicate(List *L)
 /*---------------------------------------------------FILE HANDLING------------------------------------------------------*/
 //------------------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------
+
+void doc(char *file)
+{
+    FILE *f;
+    while (1)
+    {
+        printf("\nNhap file : ");
+        scanf("%s", file);
+        printf("%s\n", file);
+        f = fopen(file, "r");
+
+        if (f == NULL)
+        {
+            printf("File khong ton tai! \n");
+            continue;
+        }
+        break;
+    }
+}
+
 void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
 {
     char line[256];
@@ -563,9 +587,9 @@ void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
 }
 
 // Hàm đọc danh sách số điện thoại từ file
-void Doc_Danh_Sach_So_Dien_Thoai(List *pL)
+void Doc_Danh_Sach_So_Dien_Thoai(List *pL, char *file)
 {
-    FILE *f = fopen("numberInfo.txt", "r");
+    FILE *f = fopen(file, "r");
     if (f == NULL)
     {
         fprintf(stderr, "Khong mo duoc file\n");
@@ -582,6 +606,26 @@ void Doc_Danh_Sach_So_Dien_Thoai(List *pL)
         }
     }
     fclose(f);
+}
+
+void outFile(char *file, List L)
+{
+    FILE *f;
+    f = fopen(file, "w");
+
+    if (f == NULL)
+    {
+        perror("Unable to open the file");
+        return 1;
+    }
+    while (L != NULL)
+    {
+        fprintf(f, "%s, %s, %s, %s\n", L->value.number, L->value.owner, L->value.address, L->value.city);
+        L = L->next;
+    }
+
+    fclose(f);
+    return 0;
 }
 
 /*---------------------------------------------------MENU INTERFACE-----------------------------------------------------------*/
@@ -691,7 +735,6 @@ void chen(List *L)
 }
 
 void option3(List *Contacts)
-
 {
     int chck, chck1, choice, index;
     printf("\t  --------------------------------------------\n");
@@ -724,6 +767,7 @@ void option3(List *Contacts)
     case 4:
         return;
     }
+    outFile("numberInfo.txt", *Contacts);
 }
 
 void option4(List Contacts)
@@ -803,9 +847,12 @@ int check_null(List L, int choose)
 
 int main()
 {
+
     system("cls");
     List Contacts = create();
     Contacts = NULL;
+    char file[100];
+    Doc_Danh_Sach_So_Dien_Thoai(&Contacts, "Contacts.txt");
     int choice = 1;
 menu:
     menu(&choice);
@@ -814,15 +861,12 @@ menu:
         exit(1);
     if (choice == 1)
     {
-        if (!check_null(Contacts, choice))
-        {
-            printf("Contacts existed!\n");
-        }
-        else
-        {
-            Doc_Danh_Sach_So_Dien_Thoai(&Contacts);
-            display(Contacts, 1);
-        }
+        file[0] = '\0';
+        // *file = '\0';
+        Contacts = NULL;
+        doc(file);
+        printf("%s\n", file);
+        Doc_Danh_Sach_So_Dien_Thoai(&Contacts, file);
     }
     else
     {
