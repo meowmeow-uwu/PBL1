@@ -60,6 +60,29 @@ Position findex(List L, int index)
     return p;
 }
 
+void loaibokhoangtrang(char *str)
+{
+    if (str == NULL || *str == '\0')
+    {
+        return; // Nếu chuỗi trống hoặc con trỏ NULL, không làm gì cả
+    }
+
+    // Duyệt qua các khoảng trắng ở đầu chuỗi
+    char *start = str;
+    while (isspace(*start))
+    {
+        start++; // Di chuyển con trỏ lên phía sau nếu gặp khoảng trắng
+    }
+
+    // Di chuyển nội dung của chuỗi lên đầu
+    char *dest = str;
+    while (*start != '\0')
+    {
+        *dest++ = *start++; // Di chuyển nội dung từ start sang dest
+    }
+    *dest = '\0'; // Kết thúc chuỗi mới
+}
+
 /*-------------------------------------------------INSERT--------------------------------------------------*/
 //------------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------
@@ -139,9 +162,16 @@ void add(List *L, struct NumberInfo num, int choose)
         insertFirst(L, num);
         break;
     case 2: // chen cuoi danh sach
-        while (q->next != NULL)
-            q = q->next;
-        insert(L, num, q);
+        if (q == NULL)
+        {
+            insertFirst(L, num);
+        }
+        else
+        {
+            while (q->next != NULL)
+                q = q->next;
+            insert(L, num, q);
+        }
         break;
     default: // NULL:))
         break;
@@ -167,32 +197,72 @@ void insertP(List *L, struct NumberInfo e, int index)
 //--------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------
 // create one new number element
+
+int isAllDigits(char *str)
+{
+    int i, len = strlen(str);
+    for (i = 0; i < len; i++)
+    {
+        if (!isdigit(str[i]))
+        {
+            return 0; // Trả về 0 nếu có ký tự không phải là chữ số
+        }
+    }
+    return 1; // Trả về 1 nếu tất cả đều là chữ số
+}
+
+int is_Alpha(char *str)
+{
+    int i;
+    for (i = 0; str[i]; i++)
+    {
+        if (!isalpha(str[i]) && str[i] != ' ')
+            return 0;
+    }
+    return 1;
+}
+
+void set(char *str, int choose)
+{
+    do
+    {
+        str[0] = '\0';
+        fgets(str, 100, stdin);
+        str[strcspn(str, "\n")] = '\0';
+        viethoa(str);
+        if (choose == 2)
+            return;
+        if (!is_Alpha(str))
+            printf("Should only in alphabet!\nPlease type again: ");
+    } while (!is_Alpha(str));
+    loaibokhoangtrang(str);
+}
+
 struct NumberInfo setNumber()
 {
     struct NumberInfo one;
     char str[100];
 
-    printf("\nSo dien thoai: ");
-    fgets(str, sizeof(str), stdin);
-    str[strcspn(str, "\n")] = '\0';
+    do
+    {
+        printf("\nSo dien thoai: ");
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (!isAllDigits || strlen(str) != 10)
+            printf("\nSdt phai la 1 day so gom 10 so!");
+    } while (!isAllDigits(str) || strlen(str) != 10);
     one.number = strdup(str);
 
     printf("Chu so huu: ");
-    fgets(str, sizeof(str), stdin);
-    str[strcspn(str, "\n")] = '\0';
-    viethoa(str);
+    set(str, 1);
     one.owner = strdup(str);
 
     printf("Dia chi: ");
-    fgets(str, sizeof(str), stdin);
-    str[strcspn(str, "\n")] = '\0';
-    viethoa(str);
+    set(str, 2);
     one.address = strdup(str);
 
     printf("Thanh pho: ");
-    fgets(str, sizeof(str), stdin);
-    str[strcspn(str, "\n")] = '\0';
-    viethoa(str);
+    set(str, 1);
     one.city = strdup(str);
 
     return one;
@@ -208,12 +278,12 @@ void display(List L, int choose) // choose = 0 <=> in 1 Position
     int count = 1;
     if (!choose && L != NULL)
     {
-        printf("-Number: %s\n  -City: %s\n  -Owner: %s\n  -Address: %s\n", L->value.number, L->value.city, L->value.owner, L->value.address);
+        printf("-Number: \t%s\n  -City: \t%s\n  -Owner: \t%s\n  -Address: \t%s\n\n", L->value.number, L->value.city, L->value.owner, L->value.address);
         return;
     }
     while (L != NULL)
     {
-        printf("%d. -Number: %s\n  -City: %s\n  -Owner: %s\n  -Address: %s\n", count++, L->value.number, L->value.city, L->value.owner, L->value.address);
+        printf("%d. -Number: \t%s\n  -City: \t%s\n  -Owner: \t%s\n  -Address: \t%s\n\n", count++, L->value.number, L->value.city, L->value.owner, L->value.address);
         L = L->next;
     }
     printf("\n");
@@ -475,15 +545,19 @@ void Doc_File_Thong_Tin_So_Dien_Thoai(FILE *filein, struct NumberInfo *e)
         line[strcspn(line, "\n")] = '\0';
 
         char *token = strtok(line, ",");
+        loaibokhoangtrang(token);
         e->number = strdup(token);
 
-        token = strtok(NULL, ",");
+        token = strtok(NULL, ", ");
+        loaibokhoangtrang(token);
         e->owner = strdup(token);
 
         token = strtok(NULL, ",");
+        loaibokhoangtrang(token);
         e->address = strdup(token);
 
         token = strtok(NULL, ",");
+        loaibokhoangtrang(token);
         e->city = strdup(token);
     }
 }
@@ -504,7 +578,7 @@ void Doc_Danh_Sach_So_Dien_Thoai(List *pL)
         Doc_File_Thong_Tin_So_Dien_Thoai(f, &e);
         if (e.number != NULL)
         {
-            insertFirst(pL, e);
+            add(pL, e, 2);
         }
     }
     fclose(f);
@@ -522,7 +596,7 @@ void check(int chck, int *choice, int n)
         getchar();
         if (!(chck == 1 && *choice >= 1 && *choice <= n))
         {
-            printf("Value must be from 1 to %d\n!! Please choose again.\n", n);
+            printf("Value must be a number from 1 to %d\n!! Please choose again.\n", n);
             continue;
         }
         else
@@ -610,7 +684,7 @@ void chen(List *L)
         insertP(L, e, index);
         break;
     }
-    printf("Ban co muon sap xep khong?\n1. Yes\n2. No\n");
+    printf("Ban co muon sap xep lai danh sach khong?\n1. Yes\n2. No\n");
     check(chck, &choose, 2);
     if (choose == 1)
         sapxeptheo(L);
@@ -648,7 +722,7 @@ void option3(List *Contacts)
         break;
 
     case 4:
-    return;
+        return;
     }
 }
 
@@ -716,11 +790,12 @@ void option4(List Contacts)
     }
 }
 
-int check_null(List L)
+int check_null(List L, int choose)
 {
     if (L == NULL)
     {
-        printf("Ban chua doc file!\nHay quay lai menu de doc du lieu!\n");
+        if (choose != 1)
+            printf("Ban chua doc file!\nHay quay lai menu de doc du lieu!\n");
         return 1;
     }
     return 0;
@@ -739,16 +814,19 @@ menu:
         exit(1);
     if (choice == 1)
     {
-        if (!check_null(Contacts))
+        if (!check_null(Contacts, choice))
         {
             printf("Contacts existed!\n");
         }
-        Doc_Danh_Sach_So_Dien_Thoai(&Contacts);
-        display(Contacts, 1);
+        else
+        {
+            Doc_Danh_Sach_So_Dien_Thoai(&Contacts);
+            display(Contacts, 1);
+        }
     }
     else
     {
-        if (check_null(Contacts))
+        if (check_null(Contacts, choice))
         {
         }
         else
@@ -784,5 +862,6 @@ menu:
 
     system("cls");
     goto menu;
+    free(Contacts);
     return 0;
 }
